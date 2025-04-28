@@ -22,7 +22,7 @@ Este proyecto implementa un backend para una aplicación de ecommerce con autent
 
 1. Clona este repositorio:
 ```
-git clone <url-del-repositorio>
+git clone https://github.com/MarraTX/backend2-entrega.git
 ```
 
 2. Instala las dependencias:
