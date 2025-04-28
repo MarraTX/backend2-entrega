@@ -1,0 +1,53 @@
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Perfil de Usuario</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Información Personal</h3>
+                        <p><strong>Nombre:</strong> {{user.first_name}} {{user.last_name}}</p>
+                        <p><strong>Correo Electrónico:</strong> {{user.email}}</p>
+                        <p><strong>Edad:</strong> {{user.age}}</p>
+                        <p><strong>Rol:</strong> {{user.role}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Información de la Cuenta</h3>
+                        <p><strong>ID de Usuario:</strong> {{user._id}}</p>
+                        <p><strong>ID del Carrito:</strong> {{user.cart}}</p>
+                        <p><strong>Cuenta Creada:</strong> {{user.createdAt}}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="/products" class="btn btn-primary">Explorar Productos</a>
+                    <a href="/cart" class="btn btn-success ms-2">Ver Carrito</a>
+                    <button id="logout-btn" class="btn btn-danger ms-2">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/sessions/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('Error al cerrar sesión');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ocurrió un error al cerrar sesión');
+        }
+    });
+</script>

@@ -1,0 +1,221 @@
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Carrito de Compras</h1>
+    </div>
+</div>
+
+{{#if cart.products.length}}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each cart.products}}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {{#if this.product.thumbnails.[0]}}
+                                                <img src="{{this.product.thumbnails.[0]}}" alt="{{this.product.title}}" class="img-thumbnail me-2" style="width: 50px;">
+                                            {{/if}}
+                                            <span>{{this.product.title}}</span>
+                                        </div>
+                                    </td>
+                                    <td>${{this.product.price}}</td>
+                                    <td>
+                                        <div class="input-group" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary decrease-quantity" type="button" data-product-id="{{this.product._id}}">-</button>
+                                            <input type="number" class="form-control text-center product-quantity" value="{{this.quantity}}" min="1" data-product-id="{{this.product._id}}">
+                                            <button class="btn btn-outline-secondary increase-quantity" type="button" data-product-id="{{this.product._id}}">+</button>
+                                        </div>
+                                    </td>
+                                    <td>${{multiply this.product.price this.quantity}}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm remove-product" data-product-id="{{this.product._id}}">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Resumen del Pedido</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">${{calculateTotal cart.products}}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Envío:</span>
+                        <span>$10.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong id="total">${{addNumbers (calculateTotal cart.products) 10}}</strong>
+                    </div>
+                    <div class="d-grid">
+                        <button class="btn btn-success" id="checkout-btn">Proceder al Pago</button>
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid mt-3">
+                <button class="btn btn-outline-danger" id="clear-cart-btn">Vaciar Carrito</button>
+            </div>
+        </div>
+    </div>
+{{else}}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <p>Tu carrito está vacío.</p>
+                <a href="/products" class="btn btn-primary">Explorar Productos</a>
+            </div>
+        </div>
+    </div>
+{{/if}}
+
+<script>
+    // Función auxiliar para actualizar la cantidad de producto
+    async function updateProductQuantity(productId, quantity) {
+        try {
+            const response = await fetch(`/api/carts/{{cart._id}}/product/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quantity })
+            });
+            
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.message || 'Error al actualizar la cantidad');
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+            return false;
+        }
+    }
+    
+    // Manejar disminución de cantidad
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            const inputElement = document.querySelector(`.product-quantity[data-product-id="${productId}"]`);
+            let quantity = parseInt(inputElement.value);
+            
+            if (quantity > 1) {
+                quantity--;
+                inputElement.value = quantity;
+                const success = await updateProductQuantity(productId, quantity);
+                if (success) {
+                    location.reload();
+                }
+            }
+        });
+    });
+    
+    // Manejar aumento de cantidad
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            const inputElement = document.querySelector(`.product-quantity[data-product-id="${productId}"]`);
+            let quantity = parseInt(inputElement.value);
+            
+            quantity++;
+            inputElement.value = quantity;
+            const success = await updateProductQuantity(productId, quantity);
+            if (success) {
+                location.reload();
+            }
+        });
+    });
+    
+    // Manejar cambio de entrada de cantidad
+    document.querySelectorAll('.product-quantity').forEach(input => {
+        input.addEventListener('change', async function() {
+            const productId = this.getAttribute('data-product-id');
+            let quantity = parseInt(this.value);
+            
+            if (quantity < 1) {
+                quantity = 1;
+                this.value = quantity;
+            }
+            
+            const success = await updateProductQuantity(productId, quantity);
+            if (success) {
+                location.reload();
+            }
+        });
+    });
+    
+    // Manejar eliminación de producto
+    document.querySelectorAll('.remove-product').forEach(button => {
+        button.addEventListener('click', async function() {
+            const productId = this.getAttribute('data-product-id');
+            
+            if (confirm('¿Estás seguro de que deseas eliminar este producto de tu carrito?')) {
+                try {
+                    const response = await fetch(`/api/carts/{{cart._id}}/product/${productId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        const result = await response.json();
+                        alert(result.message || 'Error al eliminar el producto');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error al eliminar el producto');
+                }
+            }
+        });
+    });
+    
+    // Manejar vaciado del carrito
+    document.getElementById('clear-cart-btn')?.addEventListener('click', async function() {
+        if (confirm('¿Estás seguro de que deseas vaciar tu carrito?')) {
+            try {
+                const response = await fetch(`/api/carts/{{cart._id}}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const result = await response.json();
+                    alert(result.message || 'Error al vaciar el carrito');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ocurrió un error al vaciar el carrito');
+            }
+        }
+    });
+    
+    // Manejar checkout
+    document.getElementById('checkout-btn')?.addEventListener('click', function() {
+        alert('La funcionalidad de pago no está implementada en esta demo.');
+    });
+</script>
