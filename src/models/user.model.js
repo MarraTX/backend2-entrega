@@ -35,7 +35,6 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Method to compare passwords
 userSchema.methods.isValidPassword = function(password) {
   return bcrypt.compareSync(password, this.password);
 };

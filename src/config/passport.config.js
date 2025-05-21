@@ -8,19 +8,16 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const initializePassport = () => {
-  // Local strategy for login
   passport.use('login', new LocalStrategy(
     { usernameField: 'email' },
     async (email, password, done) => {
       try {
         const user = await User.findOne({ email });
         
-        // Check if user exists
         if (!user) {
           return done(null, false, { message: 'User not found' });
         }
         
-        // Check if password is correct
         if (!bcrypt.compareSync(password, user.password)) {
           return done(null, false, { message: 'Invalid password' });
         }
@@ -32,7 +29,6 @@ const initializePassport = () => {
     }
   ));
   
-  // JWT strategy for token validation
   passport.use('jwt', new JWTStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -47,7 +43,6 @@ const initializePassport = () => {
     }
   ));
   
-  // JWT cookie extractor strategy for current user
   const cookieExtractor = (req) => {
     let token = null;
     if (req && req.cookies) {
@@ -63,13 +58,9 @@ const initializePassport = () => {
     },
     async (jwtPayload, done) => {
       try {
-        // jwtPayload es ahora el userResponse DTO completo.
-        // Verificar que el payload (DTO) tenga el campo _id.
         if (!jwtPayload || !jwtPayload._id) { 
             return done(null, false, { message: 'Invalid token payload: _id missing' });
         }
-        // Devolver el DTO del usuario (jwtPayload) directamente.
-        // req.user se convertirá en este objeto plano.
         return done(null, jwtPayload);
       } catch (error) {
         return done(error);

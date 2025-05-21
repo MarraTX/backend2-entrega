@@ -28,29 +28,24 @@ export const renderProducts = async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
     
-    // Build filter object
     const filter = {};
     if (query) {
       filter.category = query;
     }
     
-    // Build sort options
     const sortOptions = {};
     if (sort) {
       sortOptions.price = sort === 'asc' ? 1 : -1;
     }
     
-    // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    // Get products
     const products = await Product.find(filter)
       .sort(sortOptions)
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
     
-    // Get total count
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / parseInt(limit));
     
@@ -71,7 +66,7 @@ export const renderProducts = async (req, res) => {
   }
 };
 
-import Cart from '../models/cart.model.js'; // Asegúrate que la ruta al modelo Cart sea correcta
+import Cart from '../models/cart.model.js';
 
 export const renderCart = async (req, res) => {
   try {

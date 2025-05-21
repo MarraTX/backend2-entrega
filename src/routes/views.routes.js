@@ -11,7 +11,6 @@ import {
 
 const router = Router();
 
-// Middleware para rutas que REQUIEREN autenticación
 const isAuthenticated = (req, res, next) => {
   if (req.cookies.jwt) {
     return passport.authenticate('current', { session: false })(req, res, next);
@@ -19,7 +18,6 @@ const isAuthenticated = (req, res, next) => {
   return res.redirect('/login');
 };
 
-// Middleware para autenticación OPCIONAL (suave)
 const softAuthenticate = (req, res, next) => {
   passport.authenticate('current', { session: false }, (err, user, info) => {
     if (err) {
@@ -33,22 +31,16 @@ const softAuthenticate = (req, res, next) => {
   })(req, res, next);
 };
 
-// Home page
 router.get('/', softAuthenticate, renderHome);
 
-// Login page
 router.get('/login', renderLogin);
 
-// Register page
 router.get('/register', renderRegister);
 
-// Profile page (authenticated users only)
 router.get('/profile', isAuthenticated, renderProfile);
 
-// Products page
 router.get('/products', softAuthenticate, renderProducts);
 
-// Cart page (authenticated users only)
 router.get('/cart', isAuthenticated, renderCart);
 
 export default router;

@@ -30,19 +30,15 @@ export const createUser = async (req, res) => {
   try {
     const { first_name, last_name, email, age, password, role } = req.body;
     
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ status: 'error', message: 'Email already registered' });
     }
     
-    // Create a new cart for the user
     const newCart = await Cart.create({ products: [] });
     
-    // Hash the password
     const hashedPassword = bcrypt.hashSync(password, 10);
     
-    // Create the new user
     const newUser = await User.create({
       first_name,
       last_name,
@@ -53,7 +49,6 @@ export const createUser = async (req, res) => {
       role: role || 'user'
     });
     
-    // Remove password from response
     const userResponse = newUser.toObject();
     delete userResponse.password;
     
@@ -68,13 +63,11 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { first_name, last_name, email, age, role } = req.body;
     
-    // Check if user exists
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ status: 'error', message: 'User not found' });
     }
     
-    // Check if email is being updated and if it's already in use
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -82,7 +75,6 @@ export const updateUser = async (req, res) => {
       }
     }
     
-    // Update user
     const updatedUser = await User.findByIdAndUpdate(
       id,
       { first_name, last_name, email, age, role },
@@ -99,13 +91,11 @@ export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Check if user exists
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ status: 'error', message: 'User not found' });
     }
     
-    // Delete user
     await User.findByIdAndDelete(id);
     
     res.status(200).json({ status: 'success', message: 'User deleted successfully' });

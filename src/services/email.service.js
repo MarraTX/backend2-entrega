@@ -1,9 +1,8 @@
 import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Asegúrate de que las variables de entorno se carguen
+dotenv.config();
 
-// Configura SendGrid
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 } else {
@@ -14,10 +13,10 @@ const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL;
 
 /**
  * Envía un correo electrónico utilizando SendGrid.
- * @param {object} options - Opciones del correo.
- * @param {string} options.to - Dirección de correo del destinatario.
- * @param {string} options.subject - Asunto del correo.
- * @param {string} options.html - Contenido HTML del correo.
+ * @param {object} options 
+ * @param {string} options.to 
+ * @param {string} options.subject 
+ * @param {string} options.html 
  * @returns {Promise<void>}
  */
 export const sendEmail = async ({ to, subject, html }) => {
@@ -28,7 +27,7 @@ export const sendEmail = async ({ to, subject, html }) => {
 
   const msg = {
     to,
-    from: SENDGRID_FROM_EMAIL, // Usa la dirección de correo verificada en SendGrid
+    from: SENDGRID_FROM_EMAIL,
     subject,
     html,
   };

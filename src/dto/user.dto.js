@@ -1,6 +1,5 @@
 export default class UserDTO {
     constructor(user) {
-        // Asegúrate de que user no sea null o undefined
         if (!user) {
             throw new Error('User data is required to create a UserDTO');
         }
@@ -8,6 +7,5 @@ export default class UserDTO {
         this.apellido = user.last_name;
         this.email = user.email;
         this.rol = user.role;
-        // No incluir la contraseña ni otra información sensible
     }
 }

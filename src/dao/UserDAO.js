@@ -3,7 +3,7 @@ import User from '../models/user.model.js';
 class UserDAO {
     async getAll() {
         try {
-            return await User.find().lean(); // Use .lean() for plain JS objects
+            return await User.find().lean();
         } catch (error) {
             throw new Error(`Error getting all users: ${error.message}`);
         }
@@ -27,7 +27,6 @@ class UserDAO {
 
     async create(userData) {
         try {
-            // Password hashing should be handled by a pre-save hook in the model or in the service layer
             const newUser = new User(userData);
             return await newUser.save();
         } catch (error) {
@@ -51,7 +50,6 @@ class UserDAO {
         }
     }
 
-    // You might want to add a method to get the user with the cart populated
     async getByIdWithCart(id) {
         try {
             return await User.findById(id).populate('cart').lean();
@@ -61,4 +59,4 @@ class UserDAO {
     }
 }
 
-export default new UserDAO(); // Export an instance
+export default new UserDAO();
