@@ -7,8 +7,10 @@ import {
   removeProductFromCart, 
   updateCart, 
   updateProductQuantity, 
-  clearCart 
+  clearCart,
+  purchaseCart
 } from '../controllers/carts.controller.js';
+import { authorizeUser, authorizeRoles } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
@@ -19,7 +21,7 @@ router.post('/', createCart);
 router.get('/:id', getCartById);
 
 // Add product to cart
-router.post('/:cid/product/:pid', passport.authenticate('current', { session: false }), addProductToCart);
+router.post('/:cid/product/:pid', passport.authenticate('current', { session: false }), authorizeRoles('user', 'admin'), addProductToCart);
 
 // Remove product from cart
 router.delete('/:cid/product/:pid', passport.authenticate('current', { session: false }), removeProductFromCart);
@@ -32,5 +34,8 @@ router.put('/:cid/product/:pid', passport.authenticate('current', { session: fal
 
 // Clear cart
 router.delete('/:cid', passport.authenticate('current', { session: false }), clearCart);
+
+// Purchase cart
+router.post('/:cid/purchase', passport.authenticate('current', { session: false }), authorizeUser, purchaseCart);
 
 export default router;

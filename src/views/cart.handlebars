@@ -215,7 +215,47 @@
     });
     
     // Manejar checkout
-    document.getElementById('checkout-btn')?.addEventListener('click', function() {
-        alert('La funcionalidad de pago no está implementada en esta demo.');
+    document.getElementById('checkout-btn')?.addEventListener('click', async function() {
+        const cartId = '{{cart._id}}'; // Obtener el ID del carrito desde Handlebars
+        if (!cartId) {
+            alert('Error: No se pudo obtener el ID del carrito.');
+            return;
+        }
+
+        if (!confirm('¿Estás seguro de que deseas finalizar tu compra?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/carts/${cartId}/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                let successMessage = `¡Compra exitosa!\nTicket: ${result.ticket.code}\nMonto: $${result.ticket.amount.toFixed(2)}`;
+                if (result.productsNotPurchasedIds && result.productsNotPurchasedIds.length > 0) {
+                    successMessage += `\n\nAlgunos productos no pudieron ser comprados por falta de stock y permanecen en tu carrito.`;
+                }
+                alert(successMessage);
+                window.location.href = '/products'; // Redirigir a la página de productos o a una de confirmación
+            } else {
+                let errorMessage = 'Error al procesar la compra.';
+                if (result.message) {
+                    errorMessage += `\nDetalle: ${result.message}`;
+                }
+                if (result.productsNotPurchasedIds && result.productsNotPurchasedIds.length > 0) {
+                    errorMessage += `\nProductos no comprados (IDs): ${result.productsNotPurchasedIds.join(', ')}`;
+                }
+                alert(errorMessage);
+            }
+        } catch (error) {
+            console.error('Error durante el checkout:', error);
+            alert('Ocurrió un error inesperado al procesar tu compra. Por favor, intenta de nuevo.');
+        }
     });
 </script>

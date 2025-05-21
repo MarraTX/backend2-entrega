@@ -38,8 +38,57 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 initializePassport();
 app.use(passport.initialize());
 
+// Helper functions for Handlebars
+const range = (start, end) => {
+  const arr = [];
+  for (let i = start; i <= end; i++) {
+    arr.push(i);
+  }
+  return arr;
+};
+
+const eq = (a, b) => {
+  return a === b;
+};
+
+const multiply = (a, b) => {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a * b;
+  }
+  return 0; // O manejar el error como prefieras
+};
+
+const calculateTotal = (products) => {
+  let total = 0;
+  if (Array.isArray(products)) {
+    products.forEach(item => {
+      if (item && typeof item.product.price === 'number' && typeof item.quantity === 'number') {
+        total += item.product.price * item.quantity;
+      }
+    });
+  }
+  return total.toFixed(2); // Devuelve con 2 decimales
+};
+
+const addNumbers = (a, b) => {
+  const numA = parseFloat(a); // calculateTotal devuelve un string con toFixed(2)
+  const numB = parseFloat(b);
+  if (!isNaN(numA) && !isNaN(numB)) {
+    return (numA + numB).toFixed(2);
+  }
+  return 'Error'; // O manejar el error como prefieras
+};
+
 // Configure handlebars
-app.engine('handlebars', handlebars.engine());
+app.engine('handlebars', handlebars.engine({
+    helpers: {
+        range,
+        eq,
+        multiply,
+        calculateTotal,
+        addNumbers
+    }
+}));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'handlebars');
 

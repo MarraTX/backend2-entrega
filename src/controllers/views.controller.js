@@ -2,8 +2,11 @@ import Product from '../models/product.model.js';
 
 export const renderHome = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.render('home', { products });
+    const products = await Product.find().lean();
+    res.render('home', { 
+      products,
+      user: req.user 
+    });
   } catch (error) {
     res.status(500).render('error', { error: error.message });
   }
@@ -44,7 +47,8 @@ export const renderProducts = async (req, res) => {
     const products = await Product.find(filter)
       .sort(sortOptions)
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean();
     
     // Get total count
     const totalProducts = await Product.countDocuments(filter);
@@ -67,14 +71,24 @@ export const renderProducts = async (req, res) => {
   }
 };
 
+import Cart from '../models/cart.model.js'; // Asegúrate que la ruta al modelo Cart sea correcta
+
 export const renderCart = async (req, res) => {
   try {
     if (!req.user || !req.user.cart) {
       return res.redirect('/login');
     }
     
-    const cart = await req.user.cart.populate('products.product');
-    res.render('cart', { cart });
+    const cartId = req.user.cart; 
+    const cart = await Cart.findById(cartId)
+                           .populate('products.product')
+                           .lean();
+
+    if (!cart) {
+      return res.status(404).render('error', { error: 'Carrito no encontrado' });
+    }
+    
+    res.render('cart', { cart, user: req.user });
   } catch (error) {
     res.status(500).render('error', { error: error.message });
   }

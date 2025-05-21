@@ -1,16 +1,9 @@
 import { Router } from 'express';
 import passport from 'passport';
 import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } from '../controllers/products.controller.js';
+import { authorizeAdmin } from '../middlewares/auth.middleware.js';
 
 const router = Router();
-
-// Middleware to check if user is authenticated and is an admin
-const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    return next();
-  }
-  return res.status(403).json({ status: 'error', message: 'Forbidden: Admin access required' });
-};
 
 // Get all products
 router.get('/', getAllProducts);
@@ -19,12 +12,12 @@ router.get('/', getAllProducts);
 router.get('/:id', getProductById);
 
 // Create a new product (admin only)
-router.post('/', passport.authenticate('current', { session: false }), isAdmin, createProduct);
+router.post('/', passport.authenticate('current', { session: false }), authorizeAdmin, createProduct);
 
 // Update a product (admin only)
-router.put('/:id', passport.authenticate('current', { session: false }), isAdmin, updateProduct);
+router.put('/:id', passport.authenticate('current', { session: false }), authorizeAdmin, updateProduct);
 
 // Delete a product (admin only)
-router.delete('/:id', passport.authenticate('current', { session: false }), isAdmin, deleteProduct);
+router.delete('/:id', passport.authenticate('current', { session: false }), authorizeAdmin, deleteProduct);
 
 export default router;

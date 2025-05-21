@@ -63,11 +63,14 @@ const initializePassport = () => {
     },
     async (jwtPayload, done) => {
       try {
-        const user = await User.findById(jwtPayload.id).populate('cart');
-        if (!user) {
-          return done(null, false, { message: 'User not found' });
+        // jwtPayload es ahora el userResponse DTO completo.
+        // Verificar que el payload (DTO) tenga el campo _id.
+        if (!jwtPayload || !jwtPayload._id) { 
+            return done(null, false, { message: 'Invalid token payload: _id missing' });
         }
-        return done(null, user);
+        // Devolver el DTO del usuario (jwtPayload) directamente.
+        // req.user se convertirá en este objeto plano.
+        return done(null, jwtPayload);
       } catch (error) {
         return done(error);
       }

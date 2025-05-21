@@ -42,7 +42,9 @@
                         <p class="card-text"><small class="text-muted">Categoría: {{this.category}}</small></p>
                         <p class="card-text"><small class="text-muted">Stock: {{this.stock}}</small></p>
                         {{#if ../user}}
-                            <button class="btn btn-success add-to-cart" data-product-id="{{this._id}}">Agregar al Carrito</button>
+                            <button class="btn btn-success add-to-cart" 
+                                    data-product-id="{{this._id}}" 
+                                    data-cart-id="{{../user.cart}}">Agregar al Carrito</button>
                         {{else}}
                             <a href="/login" class="btn btn-outline-primary">Inicia Sesión para Comprar</a>
                         {{/if}}
@@ -121,8 +123,16 @@
     addToCartButtons.forEach(button => {
         button.addEventListener('click', async function() {
             const productId = this.getAttribute('data-product-id');
+            const cartId = this.getAttribute('data-cart-id');
+
+            if (!cartId) {
+                alert('ID del carrito no encontrado. Asegúrate de haber iniciado sesión.');
+                // Podrías redirigir a login o simplemente no hacer nada más
+                return; 
+            }
+
             try {
-                const response = await fetch(`/api/carts/{{../user.cart}}/product/${productId}`, {
+                const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
